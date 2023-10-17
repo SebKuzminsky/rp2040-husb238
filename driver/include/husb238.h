@@ -1,32 +1,6 @@
 #ifndef __HUSB238_H__
 #define __HUSB238_H__
 
-// 0: dont say anything
-// 1: only say errors
-// 2: verbose debug output
-#define HUSB238_VERBOSE 1
-
-#define HUSB238_ERROR(fmt, args...) if (HUSB238_VERBOSE >= 1) { printf(fmt, ## args); }
-#define HUSB238_PRINT(fmt, args...) if (HUSB238_VERBOSE >= 2) { printf(fmt, ## args); }
-
-
-#define HUSB238_I2C_SLAVE_ADDRESS (0x08)
-
-#define HUSB238_I2C_REG_PD_STATUS0  (0x00)
-#define HUSB238_I2C_REG_PD_STATUS1  (0x01)
-#define HUSB238_I2C_REG_SRC_PDO_5V  (0x02)
-#define HUSB238_I2C_REG_SRC_PDO_9V  (0x03)
-#define HUSB238_I2C_REG_SRC_PDO_12V (0x04)
-#define HUSB238_I2C_REG_SRC_PDO_15V (0x05)
-#define HUSB238_I2C_REG_SRC_PDO_18V (0x06)
-#define HUSB238_I2C_REG_SRC_PDO_20V (0x07)
-#define HUSB238_I2C_REG_SRC_PDO     (0x08)
-#define HUSB238_I2C_REG_GO_COMMAND  (0x09)
-
-#define HUSB238_CMD_HARD_RESET  (0x10)
-#define HUSB238_CMD_GET_SRC_CAP (0x04)
-#define HUSB238_CMD_SELECT_PDO  (0x01)
-
 #define HUSB238_SRC_PDO_NONE (0x00)
 #define HUSB238_SRC_PDO_5V   (0x10)
 #define HUSB238_SRC_PDO_9V   (0x20)
