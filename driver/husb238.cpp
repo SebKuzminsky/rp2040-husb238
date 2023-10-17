@@ -30,6 +30,25 @@
 #define HUSB238_CMD_SELECT_PDO  (0x01)
 
 
+// This is the active voltage, indexed by the PD_SRC_VOLTAGE field of
+// register PD_STATUS0.
+static int husb238_pd_src_voltage[] = {
+    -1, // no PD voltage attached
+    5, 9, 12, 15, 18, 20
+};
+
+// This is the max current, indexed by the PD_SRC_CURRENT field of
+// register PD_STATUS0.
+static float husb238_pd_src_current[] = {
+    0.5, 0.7,
+    1.0, 1.25, 1.5, 1.75,
+    2.0, 2.25, 2.5, 2.75,
+    3.0, 3.25, 3.5,
+    4.0, 4.5,
+    5.0
+};
+
+
 static uint const i2c_timeout_us = 1000*1000;
 
 
@@ -47,6 +66,27 @@ static int husb238_read_pdo(i2c_inst_t * i2c, husb238_pdo_t * pdo) {
     }
 
     return 0;
+}
+
+
+// Reads the presently active voltage and max current.
+// Returns PICO_OK if it worked, something else on error.
+int husb238_get_contract(i2c_inst_t * i2c, int & volts, float & max_current) {
+    int r;
+    uint8_t val;
+
+    r = husb238_read_pd_status0(i2c, &val);
+    if (r != PICO_OK) {
+        return r;
+    }
+
+    int voltage_index = val >> 4;
+    volts = husb238_pd_src_voltage[voltage_index];
+
+    int current_index = val & 0x0f;
+    max_current = husb238_pd_src_current[current_index];
+
+    return PICO_OK;
 }
 
 
@@ -213,22 +253,10 @@ void husb238_dump_registers(i2c_inst_t * i2c) {
     printf("PD_STATUS0: 0x%02x\n", val);
 
     int voltage_index = val >> 4;
-    int pd_src_voltage[] = {
-        -1, // no PD voltage attached
-        5, 9, 12, 15, 18, 20
-    };
-    printf("    PD source providing %d V\n", pd_src_voltage[voltage_index]);
+    printf("    PD source providing %d V\n", husb238_pd_src_voltage[voltage_index]);
 
     int current_index = val & 0x0f;
-    float pd_src_current[] = {
-        0.5, 0.7,
-        1.0, 1.25, 1.5, 1.75,
-        2.0, 2.25, 2.5, 2.75,
-        3.0, 3.25, 3.5,
-        4.0, 4.5,
-        5.0
-    };
-    printf("    PD source max current %0.2f A\n", pd_src_current[current_index]);
+    printf("    PD source max current %0.2f A\n", husb238_pd_src_current[current_index]);
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_PD_STATUS1, &val);
     if (r != PICO_OK) return;

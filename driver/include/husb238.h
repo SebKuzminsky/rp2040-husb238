@@ -19,6 +19,8 @@ typedef struct {
 } husb238_pdo_t;
 
 
+int husb238_get_contract(i2c_inst_t * i2c, int & volts, float & max_current);
+
 int husb238_get_pdos(i2c_inst_t * i2c, husb238_pdo_t pdos[6]);
 int husb238_get_current_pdo(i2c_inst_t * i2c);
 
