@@ -129,6 +129,8 @@ int husb238_get_src_cap(i2c_inst_t * i2c) {
 }
 
 
+// Select the PDO with the specified PDO ID (one of the HUSB238_SRC_PDO_* constants).
+// Returns PICO_OK if all went well, some PICO_* error on failure.
 int husb238_select_pdo(i2c_inst_t * i2c, int pdo) {
     int r;
 
