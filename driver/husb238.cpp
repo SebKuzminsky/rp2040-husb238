@@ -126,16 +126,24 @@ int husb238_get_current_pdo(i2c_inst_t * i2c, int * pdo) {
 }
 
 
-int husb238_connected(i2c_inst_t * i2c) {
+bool husb238_connected(i2c_inst_t * i2c) {
     uint8_t in_data;
 
-    int r = i2c_read_blocking(i2c, HUSB238_I2C_SLAVE_ADDRESS, &in_data, sizeof(in_data), false);
+    int r = i2c_read_timeout_us(
+        i2c,
+        HUSB238_I2C_SLAVE_ADDRESS,
+        &in_data,
+        sizeof(in_data),
+        false,
+        i2c_timeout_us
+    );
+
     if (r < 0) {
         HUSB238_ERROR("HUSB238 not responding\n");
-        return 0;
+        return false;
     } else {
         HUSB238_PRINT("HUSB238 found!\n");
-        return 1;
+        return true;
     }
 }
 

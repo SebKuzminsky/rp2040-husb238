@@ -34,7 +34,12 @@ int husb238_get_pdos(i2c_inst_t * i2c, husb238_pdo_t pdos[6]);
 //
 int husb238_get_current_pdo(i2c_inst_t * i2c, int * pdo);
 
-int husb238_connected(i2c_inst_t * i2c);
+//
+// Try to communicate with the HUSB238.  Returns true if the HUSB238
+// was detected, false if not.
+//
+bool husb238_connected(i2c_inst_t * i2c);
+
 int husb238_read_register(i2c_inst_t * i2c, uint8_t reg, uint8_t * val);
 
 int husb238_reset(i2c_inst_t * i2c);
