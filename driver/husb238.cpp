@@ -112,13 +112,17 @@ int husb238_get_pdos(i2c_inst_t * i2c, husb238_pdo_t pdos[6]) {
 }
 
 
-int husb238_get_current_pdo(i2c_inst_t * i2c) {
+int husb238_get_current_pdo(i2c_inst_t * i2c, int * pdo) {
     int r;
     uint8_t val;
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_SRC_PDO, &val);
-    if (r != PICO_OK) return HUSB238_SRC_PDO_NONE;
-    return (val & 0xf0);
+    if (r != PICO_OK) {
+        *pdo = HUSB238_SRC_PDO_NONE;
+        return r;
+    }
+    *pdo = val & 0xf0;
+    return PICO_OK;
 }
 
 

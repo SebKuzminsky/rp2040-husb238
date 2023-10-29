@@ -22,7 +22,17 @@ typedef struct {
 int husb238_get_contract(i2c_inst_t * i2c, int & volts, float & max_current);
 
 int husb238_get_pdos(i2c_inst_t * i2c, husb238_pdo_t pdos[6]);
-int husb238_get_current_pdo(i2c_inst_t * i2c);
+
+//
+// Reads the currently active PDO ID from the HUSB238 and sets *pdo to
+// the corresponding HUSB238_SRC_PDO_* constant.
+//
+// Returns PICO_OK if everything went ok.  Returns one of the PICO_ERROR_*
+// constants from "pico/error.h" if there was a problem, in which case
+// *pdo is set to HUSB238_SRC_PDO_NONE, even though that value probably
+// doesn't match reality.
+//
+int husb238_get_current_pdo(i2c_inst_t * i2c, int * pdo);
 
 int husb238_connected(i2c_inst_t * i2c);
 int husb238_read_register(i2c_inst_t * i2c, uint8_t reg, uint8_t * val);
