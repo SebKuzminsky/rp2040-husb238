@@ -40,7 +40,13 @@ int husb238_read_register(i2c_inst_t * i2c, uint8_t reg, uint8_t * val);
 int husb238_reset(i2c_inst_t * i2c);
 int husb238_get_src_cap(i2c_inst_t * i2c);
 
-void husb238_dump_registers(i2c_inst_t * i2c);
+//
+// Read and print all registers on the HUSB238.
+//
+// Returns PICO_OK if all went well, or one of the PICO_ERROR_* constants
+// from "pico/error.h" if there was a problem.
+//
+int husb238_dump_registers(i2c_inst_t * i2c);
 
 int husb238_read_pd_status0(i2c_inst_t * i2c, uint8_t * val);
 int husb238_read_pd_status1(i2c_inst_t * i2c, uint8_t * val);

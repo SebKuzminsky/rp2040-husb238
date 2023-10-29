@@ -248,12 +248,12 @@ float husb238_pdo_max_current(uint8_t pdo) {
 }
 
 
-void husb238_dump_registers(i2c_inst_t * i2c) {
+int husb238_dump_registers(i2c_inst_t * i2c) {
     uint8_t val;
     int r;
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_PD_STATUS0, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("PD_STATUS0: 0x%02x\n", val);
 
     int voltage_index = val >> 4;
@@ -263,7 +263,7 @@ void husb238_dump_registers(i2c_inst_t * i2c) {
     printf("    PD source max current %0.2f A\n", husb238_pd_src_current[current_index]);
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_PD_STATUS1, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("PD_STATUS1: 0x%02x\n", val);
 
     if (val & 0x80) {
@@ -303,31 +303,31 @@ void husb238_dump_registers(i2c_inst_t * i2c) {
 
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_SRC_PDO_5V, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("SRC_PDO_5V: 0x%02x (%s, %0.2fA max)\n", val, val & 0x80 ? "detected" : "not detected", husb238_pdo_max_current(val));
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_SRC_PDO_9V, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("SRC_PDO_9V: 0x%02x (%s, %0.2fA max)\n", val, val & 0x80 ? "detected" : "not detected", husb238_pdo_max_current(val));
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_SRC_PDO_12V, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("SRC_PDO_12V: 0x%02x (%s, %0.2fA max)\n", val, val & 0x80 ? "detected" : "not detected", husb238_pdo_max_current(val));
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_SRC_PDO_15V, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("SRC_PDO_15V: 0x%02x (%s, %0.2fA max)\n", val, val & 0x80 ? "detected" : "not detected", husb238_pdo_max_current(val));
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_SRC_PDO_18V, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("SRC_PDO_18V: 0x%02x (%s, %0.2fA max)\n", val, val & 0x80 ? "detected" : "not detected", husb238_pdo_max_current(val));
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_SRC_PDO_20V, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("SRC_PDO_20V: 0x%02x (%s, %0.2fA max)\n", val, val & 0x80 ? "detected" : "not detected", husb238_pdo_max_current(val));
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_SRC_PDO, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("SRC_PDO: 0x%02x\n", val);
     switch (val & 0xf0) {
         case HUSB238_SRC_PDO_NONE:
@@ -357,8 +357,10 @@ void husb238_dump_registers(i2c_inst_t * i2c) {
     }
 
     r = husb238_read_register(i2c, HUSB238_I2C_REG_GO_COMMAND, &val);
-    if (r != PICO_OK) return;
+    if (r != PICO_OK) return r;
     printf("GO_COMMAND: 0x%02x\n", val);
+
+    return PICO_OK;
 }
 
 
