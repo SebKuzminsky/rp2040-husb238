@@ -18,25 +18,24 @@ add_compile_options(
 set(PROJECT_NAME "husb238-example")
 project(${PROJECT_NAME} C CXX ASM)
 
-SET(PROGRAM_NAME "${PROJECT_NAME}")
-
 pico_sdk_init()
 
 add_subdirectory(../driver build.rp2040_husb238)
 
+
 add_executable(
-    ${PROGRAM_NAME}
-    main.cpp
+    cycle-pdos
+    cycle-pdos.cpp
 )
 
 target_link_libraries(
-    ${PROGRAM_NAME}
+    cycle-pdos
     pico_stdlib
     hardware_i2c
     rp2040_husb238
 )
 
-pico_enable_stdio_usb(${PROGRAM_NAME} TRUE)
-pico_enable_stdio_uart(${PROGRAM_NAME} TRUE)
+pico_enable_stdio_usb(cycle-pdos TRUE)
+pico_enable_stdio_uart(cycle-pdos TRUE)
 
-pico_add_extra_outputs(${PROGRAM_NAME})
+pico_add_extra_outputs(cycle-pdos)
