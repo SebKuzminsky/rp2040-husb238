@@ -49,7 +49,7 @@ static float husb238_pd_src_current[] = {
 };
 
 
-static uint const i2c_timeout_us = 1000*1000;
+static uint const i2c_timeout_us = 10*1000;
 
 
 static int husb238_read_pdo(i2c_inst_t * i2c, husb238_pdo_t * pdo) {
