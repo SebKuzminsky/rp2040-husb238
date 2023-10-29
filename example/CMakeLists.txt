@@ -39,3 +39,21 @@ pico_enable_stdio_usb(cycle-pdos TRUE)
 pico_enable_stdio_uart(cycle-pdos TRUE)
 
 pico_add_extra_outputs(cycle-pdos)
+
+
+add_executable(
+    i2c-stress-test
+    i2c-stress-test.cpp
+)
+
+target_link_libraries(
+    i2c-stress-test
+    pico_stdlib
+    hardware_i2c
+    rp2040_husb238
+)
+
+pico_enable_stdio_usb(i2c-stress-test TRUE)
+pico_enable_stdio_uart(i2c-stress-test TRUE)
+
+pico_add_extra_outputs(i2c-stress-test)
