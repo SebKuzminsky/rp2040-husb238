@@ -7,7 +7,7 @@
 // 0: dont say anything
 // 1: only say errors
 // 2: verbose debug output
-#define HUSB238_VERBOSE 1
+#define HUSB238_VERBOSE 0
 
 #define HUSB238_ERROR(fmt, args...) if (HUSB238_VERBOSE >= 1) { printf(fmt, ## args); }
 #define HUSB238_PRINT(fmt, args...) if (HUSB238_VERBOSE >= 2) { printf(fmt, ## args); }
