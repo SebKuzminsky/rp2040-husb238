@@ -26,7 +26,7 @@ int main() {
     const uint scl_gpio = 17;  // pin 22
 
     i2c = i2c0;
-    uint i2c_freq = 400*1000;  // run i2c at 400 kHz
+    uint i2c_freq = 100*1000;  // run i2c at 400 kHz
 
     i2c_init(i2c, i2c_freq);
 
