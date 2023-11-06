@@ -63,11 +63,13 @@ int main() {
             }
             connected = false;
 
+#if 0
             // This does not reset the HUSB238 out of its crash and disconnect :-(
             i2c_deinit(i2c);
-            sleep_ms(100);
+            sleep_ms(10);
             i2c_init(i2c, i2c_freq);
-            sleep_ms(100);
+            sleep_ms(10);
+#endif
         } else {
             int r;
 
