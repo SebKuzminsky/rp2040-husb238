@@ -49,7 +49,23 @@ static float husb238_pd_src_current[] = {
 };
 
 
-static uint const i2c_timeout_us = 10*1000;
+//
+// 1 for timeouts, 0 for blocking
+//
+// When running i2c in blocking mode, communications sometimes freezes
+// with the data line held low.  Power cycling the HUSB238 un-freezes it.
+//
+
+#define I2C_TIMEOUT 1
+
+#ifdef I2C_TIMEOUT
+// Running i2c at 100 kHz.  10 µs/bit nominal, 12 µs actual (measured).
+// Call it 13 µs to have some margin.
+static uint const i2c_bit_time_us = 13;
+
+// 8 bits/byte, plus the Ack/Nack bit.
+static uint const i2c_byte_timeout_us = i2c_bit_time_us * 9 * 2;
+#endif
 
 
 static int husb238_read_pdo(i2c_inst_t * i2c, husb238_pdo_t * pdo) {
@@ -129,14 +145,25 @@ int husb238_get_current_pdo(i2c_inst_t * i2c, int * pdo) {
 bool husb238_connected(i2c_inst_t * i2c) {
     uint8_t in_data;
 
+#if I2C_TIMEOUT // timeout
     int r = i2c_read_timeout_us(
         i2c,
         HUSB238_I2C_SLAVE_ADDRESS,
         &in_data,
         sizeof(in_data),
         false,
-        i2c_timeout_us
+        (sizeof(in_data) + 1) * i2c_byte_timeout_us
     );
+#else
+    int r = i2c_read_blocking(
+        i2c,
+        HUSB238_I2C_SLAVE_ADDRESS,
+        &in_data,
+        sizeof(in_data),
+        false
+    );
+#endif
+    sleep_us(100);
 
     if (r < 0) {
         HUSB238_ERROR("HUSB238 not responding\n");
@@ -153,14 +180,52 @@ int husb238_read_register(i2c_inst_t * i2c, uint8_t reg, uint8_t * val) {
     uint8_t out_data[] = { reg };
     uint8_t in_data[1];
 
-    r = i2c_write_timeout_us(i2c, HUSB238_I2C_SLAVE_ADDRESS, out_data, sizeof(out_data), true, i2c_timeout_us);
+#if I2C_TIMEOUT
+    r = i2c_write_timeout_us(
+        i2c,
+        HUSB238_I2C_SLAVE_ADDRESS,
+        out_data,
+        sizeof(out_data),
+        false,
+        (sizeof(out_data) + 1) * i2c_byte_timeout_us
+    );
+#else
+    r = i2c_write_blocking(
+        i2c,
+        HUSB238_I2C_SLAVE_ADDRESS,
+        out_data,
+        sizeof(out_data),
+        false
+    );
+#endif
+    sleep_us(100);
+
     if (r != sizeof(out_data)) {
         HUSB238_ERROR("failed to write register address 0x%02x to HUSB238: %d\n", reg, r);
         return PICO_ERROR_GENERIC;
     }
     HUSB238_PRINT("wrote register address 0x%02x\n", out_data[0]);
 
-    r = i2c_read_timeout_us(i2c, HUSB238_I2C_SLAVE_ADDRESS, in_data, sizeof(in_data), false, i2c_timeout_us);
+#if I2C_TIMEOUT
+    r = i2c_read_timeout_us(
+        i2c,
+        HUSB238_I2C_SLAVE_ADDRESS,
+        in_data,
+        sizeof(in_data),
+        false,
+        (sizeof(in_data) + 1) * i2c_byte_timeout_us
+    );
+#else
+    r = i2c_read_blocking(
+        i2c,
+        HUSB238_I2C_SLAVE_ADDRESS,
+        in_data,
+        sizeof(in_data),
+        false
+    );
+#endif
+    sleep_us(100);
+
     if (r != sizeof(in_data)) {
         HUSB238_ERROR("failed to read register data from HUSB238: %d\n", r);
         return PICO_ERROR_GENERIC;
@@ -179,7 +244,26 @@ int husb238_write_register(i2c_inst_t * i2c, uint8_t reg, uint8_t val) {
     int r;
     uint8_t out_data[] = { reg, val };
 
-    r = i2c_write_timeout_us(i2c, HUSB238_I2C_SLAVE_ADDRESS, out_data, sizeof(out_data), true, i2c_timeout_us);
+#if I2C_TIMEOUT
+    r = i2c_write_timeout_us(
+        i2c,
+        HUSB238_I2C_SLAVE_ADDRESS,
+        out_data,
+        sizeof(out_data),
+        false,
+        (sizeof(out_data) + 1) * i2c_byte_timeout_us
+    );
+#else
+    r = i2c_write_blocking(
+        i2c,
+        HUSB238_I2C_SLAVE_ADDRESS,
+        out_data,
+        sizeof(out_data),
+        false
+    );
+#endif
+    sleep_us(100);
+
     if (r != sizeof(out_data)) {
         HUSB238_ERROR("failed to write 0x%02x to register address 0x%02x of HUSB238: %d\n", val, reg, r);
         return PICO_ERROR_GENERIC;
