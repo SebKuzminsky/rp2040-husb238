@@ -58,8 +58,6 @@ int main() {
             i2c_init(i2c, i2c_freq);
             sleep_ms(100);
         } else {
-            husb238_pdo_t pdos[6];
-            int current_pdo;
             int r;
 
             // printf("\x1b[2J");  // VT100: clear screen
@@ -77,7 +75,9 @@ int main() {
             }
 #endif
 
+#if 1
             // Get available PDOs.
+            husb238_pdo_t pdos[6];
             r =  husb238_get_pdos(i2c, pdos);
             if (r != PICO_OK) {
                 printf("failed to get PDOs\n");
@@ -94,8 +94,11 @@ int main() {
                 }
             }
 #endif
+#endif
 
+#if 1
             // Get current PDO.
+            int current_pdo;
             r =  husb238_get_current_pdo(i2c, &current_pdo);
             if (r != PICO_OK) {
                 printf("failed to get current PDO\n");
@@ -105,7 +108,9 @@ int main() {
 #if DEBUG
             printf("current PDO: 0x%02x\n", current_pdo);
 #endif
+#endif
 
+#if 1
             // Get current contract.
             {
                 int volts;
@@ -120,6 +125,7 @@ int main() {
                 printf("current contract: %d V, %.2f max current\n", volts, max_current);
 #endif
             }
+#endif
         }
 
         printf("%d disconnects, %d passes and %d comm errors on this connection\n", disconnects, passes, comm_errors);
