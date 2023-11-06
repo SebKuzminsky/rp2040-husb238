@@ -37,18 +37,29 @@ int main() {
     gpio_pull_up(scl_gpio);
 
 
+    // Set GPIO 0 (pin 1) high to indicate i2c error, for the scope to
+    // trigger on.
+    uint const trigger_gpio = 0;  // pin 1
+    gpio_init(trigger_gpio);
+    gpio_set_function(trigger_gpio, GPIO_FUNC_SIO);
+    gpio_set_dir(trigger_gpio, true);
+
+
     int comm_errors = 0;
     int passes = 0;
     int disconnects = 0;
     bool connected = false;
 
     while (1) {
+        gpio_put(trigger_gpio, false);
         if (!husb238_connected(i2c)) {
             printf("HUSB238 not connected, check I2C wiring and USB-C connection.\n");
             if (connected) {
+                gpio_put(trigger_gpio, true);
                 disconnects++;
                 comm_errors = 0;
                 passes = 0;
+                sleep_ms(1);
             }
             connected = false;
 
@@ -80,8 +91,10 @@ int main() {
             husb238_pdo_t pdos[6];
             r =  husb238_get_pdos(i2c, pdos);
             if (r != PICO_OK) {
+                gpio_put(trigger_gpio, true);
                 printf("failed to get PDOs\n");
                 comm_errors++;
+                sleep_ms(1);
                 continue;
             }
 #if DEBUG
@@ -101,8 +114,10 @@ int main() {
             int current_pdo;
             r =  husb238_get_current_pdo(i2c, &current_pdo);
             if (r != PICO_OK) {
+                gpio_put(trigger_gpio, true);
                 printf("failed to get current PDO\n");
                 comm_errors++;
+                sleep_ms(1);
                 continue;
             }
 #if DEBUG
@@ -117,8 +132,10 @@ int main() {
                 float max_current;
                 r =  husb238_get_contract(i2c, volts, max_current);
                 if (r != PICO_OK) {
+                    gpio_put(trigger_gpio, true);
                     printf("failed to get contract\n");
                     comm_errors++;
+                    sleep_ms(1);
                     continue;
                 }
 #if DEBUG
