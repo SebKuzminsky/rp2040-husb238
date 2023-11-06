@@ -74,6 +74,7 @@ static int husb238_read_pdo(i2c_inst_t * i2c, husb238_pdo_t * pdo) {
 
     r = husb238_read_register(i2c, pdo->reg, &val);
     if (r != PICO_OK) return r;
+
     if (val & 0x80) {
         // SRC PDO detected
         pdo->max_current = husb238_pdo_max_current(val);
@@ -121,7 +122,10 @@ int husb238_get_pdos(i2c_inst_t * i2c, husb238_pdo_t pdos[6]) {
 
     for (int i = 0; i < 6; ++i) {
         r = husb238_read_pdo(i2c, &pdos[i]);
-        if (r != PICO_OK) return r;
+        if (r != PICO_OK) {
+            HUSB238_ERROR("error reading PDO %d from HUSB238\n", i);
+            return r;
+        }
     }
 
     return PICO_OK;
@@ -165,7 +169,12 @@ bool husb238_connected(i2c_inst_t * i2c) {
 #endif
     sleep_us(100);
 
-    if (r < 0) {
+    if (r < PICO_OK) {
+        if (r == PICO_ERROR_TIMEOUT) {
+            HUSB238_ERROR("timeout reading addr Ack from HUSB238\n");
+        } else {
+            HUSB238_ERROR("unknown error reading addr Ack from HUSB238\n");
+        }
         HUSB238_ERROR("HUSB238 not responding\n");
         return false;
     } else {
@@ -200,9 +209,16 @@ int husb238_read_register(i2c_inst_t * i2c, uint8_t reg, uint8_t * val) {
 #endif
     sleep_us(100);
 
-    if (r != sizeof(out_data)) {
-        HUSB238_ERROR("failed to write register address 0x%02x to HUSB238: %d\n", reg, r);
-        return PICO_ERROR_GENERIC;
+    if (r < (int)sizeof(out_data)) {
+        if (r == PICO_ERROR_TIMEOUT) {
+            HUSB238_ERROR("timeout writing register address 0x%02x to HUSB238\n", reg);
+        } else if (r < PICO_OK) {
+            HUSB238_ERROR("unknown error writing register address 0x%02x to HUSB238\n", reg);
+        } else {
+            HUSB238_ERROR("short write of register address 0x%02x to HUSB238: %d bytes instead of %u\n", reg, r, sizeof(out_data));
+            r = PICO_ERROR_GENERIC;
+        }
+        return r;
     }
     HUSB238_PRINT("wrote register address 0x%02x\n", out_data[0]);
 
@@ -227,9 +243,17 @@ int husb238_read_register(i2c_inst_t * i2c, uint8_t reg, uint8_t * val) {
     sleep_us(100);
 
     if (r != sizeof(in_data)) {
-        HUSB238_ERROR("failed to read register data from HUSB238: %d\n", r);
-        return PICO_ERROR_GENERIC;
+        if (r == PICO_ERROR_TIMEOUT) {
+            HUSB238_ERROR("timeout reading register 0x%02x data from HUSB238\n", reg);
+        } else if (r < PICO_OK) {
+            HUSB238_ERROR("unknown error reading register 0x%02x data from HUSB238\n", reg);
+        } else{
+            HUSB238_ERROR("short read of register 0x%02x data from HUSB238: %d instead of %u\n", reg, r, sizeof(in_data));
+            r = PICO_ERROR_GENERIC;
+        }
+        return r;
     }
+
 #if HUSB238_VERBOSE >= 2
     for (size_t i = 0; i < sizeof(in_data); ++i) {
         printf("    0x%02x\n", in_data[i]);
@@ -264,8 +288,16 @@ int husb238_write_register(i2c_inst_t * i2c, uint8_t reg, uint8_t val) {
 #endif
     sleep_us(100);
 
+    if (r < PICO_OK) {
+        if (r == PICO_ERROR_TIMEOUT) {
+            HUSB238_ERROR("timeout writing register on HUSB238\n");
+        } else {
+            HUSB238_ERROR("unknown error writing register on HUSB238\n");
+        }
+        return r;
+    }
     if (r != sizeof(out_data)) {
-        HUSB238_ERROR("failed to write 0x%02x to register address 0x%02x of HUSB238: %d\n", val, reg, r);
+        HUSB238_ERROR("short write to register 0x%02x on HUSB238 (data 0x%02x): %d\n", reg, val, r);
         return PICO_ERROR_GENERIC;
     }
     HUSB238_PRINT("wrote 0x%02x to register address 0x%02x\n", out_data[1], out_data[0]);
