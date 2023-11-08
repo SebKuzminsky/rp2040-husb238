@@ -36,7 +36,7 @@ target_link_libraries(
 )
 
 pico_enable_stdio_usb(cycle-pdos TRUE)
-pico_enable_stdio_uart(cycle-pdos TRUE)
+pico_enable_stdio_uart(cycle-pdos FALSE)
 
 pico_add_extra_outputs(cycle-pdos)
 
@@ -54,6 +54,6 @@ target_link_libraries(
 )
 
 pico_enable_stdio_usb(i2c-stress-test TRUE)
-pico_enable_stdio_uart(i2c-stress-test TRUE)
+pico_enable_stdio_uart(i2c-stress-test FALSE)
 
 pico_add_extra_outputs(i2c-stress-test)
